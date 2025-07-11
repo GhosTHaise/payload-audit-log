@@ -21,7 +21,7 @@ In your Payload configuration file:
 
 ```javascript
 import { buildConfig } from "payload/config";
-import auditLogPlugin from "@rumess/payload-audit-log";
+import auditLogPlugin from "@ghosthaise/payload-audit-log";
 
 export default buildConfig({
     plugins: [
