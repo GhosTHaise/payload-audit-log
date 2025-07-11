@@ -1,5 +1,5 @@
 {
-  "name": "@rumess/payload-audit-log",
+  "name": "@ghosthaise/payload-audit-log",
   "version": "1.0.1",
   "description": "Audit log plugin for PayloadCMS with changes tracking",
   "main": "dist/index.js",
