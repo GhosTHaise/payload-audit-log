@@ -1,17 +1,17 @@
 import { GeneratedTypes, Config, Plugin  } from 'payload';
 import { AfterChangeHook, AfterDeleteHook , CollectionConfig} from 'payload/dist/collections/config/types';
 
-interface AuditLogOptions {
-    collections?: (keyof Omit<GeneratedTypes, 'audit-logs'>)[];
+export interface AuditLogOptions {
+    collections?: (keyof Omit<GeneratedTypes["collectionsUntyped"], 'audit-logs'>)[];
     includeAuth?: boolean;
 }
 
-const defaultOptions: AuditLogOptions = {
+export const defaultOptions: AuditLogOptions = {
     collections: [],
     includeAuth: false,
 };
 
-const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
+export const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
     const pluginOptions = { ...defaultOptions, ...options };
 
     return (config: Config): Config => {
@@ -138,5 +138,3 @@ const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
         return config;
     };
 };
-
-export default auditLogPlugin;
