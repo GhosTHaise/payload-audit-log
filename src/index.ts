@@ -1,10 +1,8 @@
-import { GeneratedTypes } from 'payload';
-import { Config, Plugin } from 'payload/config';
-import { AfterChangeHook, AfterDeleteHook } from 'payload/dist/collections/config/types';
-import { CollectionConfig } from 'payload/types';
+import { GeneratedTypes, Config, Plugin  } from 'payload';
+import { AfterChangeHook, AfterDeleteHook , CollectionConfig} from 'payload/dist/collections/config/types';
 
 interface AuditLogOptions {
-    collections?: (keyof Omit<GeneratedTypes['collections'], 'audit-logs'>)[];
+    collections?: (keyof Omit<GeneratedTypes, 'audit-logs'>)[];
     includeAuth?: boolean;
 }
 
