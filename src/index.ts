@@ -1,16 +1,55 @@
-import { GeneratedTypes, Config, Plugin  } from 'payload';
-import { AfterChangeHook, AfterDeleteHook , CollectionConfig} from 'payload/dist/collections/config/types';
+import { GeneratedTypes, Config, Plugin } from 'payload';
+import { AfterChangeHook, AfterDeleteHook, CollectionConfig } from 'payload/dist/collections/config/types';
 
+/**
+ * Configuration options for the Audit Log plugin.
+ */
 export interface AuditLogOptions {
-    collections?: (keyof Omit<GeneratedTypes["collectionsUntyped"], 'audit-logs'>)[];
-    includeAuth?: boolean;
+  /**
+   * List of collection names to enable audit logging for.
+   * 
+   * Example:
+   * collections: ['users', 'posts']
+   * 
+   * NOTE: The 'audit-logs' collection is excluded by default and cannot be tracked.
+   */
+  collections?: (keyof Omit<GeneratedTypes["collectionsUntyped"], 'audit-logs'>)[];
+
+  /**
+   * Whether to include authentication events (login/logout, etc.) in the audit logs.
+   * Default is false.
+   */
+  includeAuth?: boolean;
+
+  /**
+   * Array of field names to exclude from change comparison when logging 'update' actions.
+   * 
+   * Example:
+   * columnsToIgnore: ['updatedAt', 'lastLogin']
+   * 
+   * Fields in this list will not trigger a logged change if they are the only fields modified.
+   */
+  columnsToIgnore?: string[];
 }
 
+/**
+ * Default values used when no specific plugin options are provided.
+ */
 export const defaultOptions: AuditLogOptions = {
-    collections: [],
-    includeAuth: false,
+  collections: [],
+  includeAuth: false,
+  columnsToIgnore: []
 };
 
+/**
+ * Main Audit Log plugin initializer.
+ * 
+ * This plugin tracks document changes (create, update, delete) for the specified collections
+ * and optionally includes auth-related events.
+ * 
+ * @param options - Plugin customization options (see AuditLogOptions)
+ * @returns A Payload plugin function.
+ */
 export const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
     const pluginOptions = { ...defaultOptions, ...options };
 
@@ -82,6 +121,10 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
                     if (action === 'update' && previousDoc) {
                         changes = Object.keys(doc).reduce((acc, key) => {
                             if (JSON.stringify(doc[key]) !== JSON.stringify(previousDoc[key])) {
+                                if (options.columnsToIgnore?.includes(key)) {
+                                    return acc;
+                                }
+
                                 acc[key] = {
                                     old: previousDoc[key],
                                     new: doc[key],
