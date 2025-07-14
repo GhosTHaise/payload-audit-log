@@ -15,10 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: npm test
+      - run: yarn ci
+      - run: yarn test
 
-  publish-npm:
+  publish-yarn:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -26,8 +26,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish
+          registry-url: https://registry.yarnjs.org/
+      - run: yarn ci
+      - run: yarn publish
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{secrets.yarn_token}}
