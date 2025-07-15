@@ -9,7 +9,7 @@
     "prepare": "npm run build",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "format": "prettier --write 'src/**/*.{js,ts}'",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run"
   },
   "keywords": [
     "payload",
@@ -38,7 +38,8 @@
     "eslint-plugin-prettier": "^5.1.3",
     "payload": "^3.0.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/index.js",
