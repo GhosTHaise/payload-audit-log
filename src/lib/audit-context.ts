@@ -127,7 +127,7 @@ class AuditContextManager {
    * Generates a unique request ID.
    */
   generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${require('uuid').v4()}`;
   }
 
   /**
