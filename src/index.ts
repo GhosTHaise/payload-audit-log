@@ -1,5 +1,6 @@
 import { GeneratedTypes, Config, Plugin } from 'payload';
 import { AfterChangeHook, AfterDeleteHook, CollectionConfig } from 'payload/dist/collections/config/types';
+import { formatChanges, shouldLogChanges, ChangeFormatterOptions } from './change-formatter';
 
 /**
  * Configuration options for the Audit Log plugin.
@@ -30,6 +31,11 @@ export interface AuditLogOptions {
    * Fields in this list will not trigger a logged change if they are the only fields modified.
    */
   columnsToIgnore?: string[];
+
+  /**
+   * Configuration for change formatting to reduce noise in audit logs.
+   */
+  changeFormatter?: ChangeFormatterOptions;
 }
 
 /**
@@ -38,7 +44,12 @@ export interface AuditLogOptions {
 export const defaultOptions: AuditLogOptions = {
   collections: [],
   includeAuth: false,
-  columnsToIgnore: []
+  columnsToIgnore: [],
+  changeFormatter: {
+    excludeFields: ['id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy'],
+    meaningfulChangesOnly: true,
+    maxDepth: 5
+  }
 };
 
 /**
@@ -119,19 +130,21 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): Plugin => {
                     let changes = null;
 
                     if (action === 'update' && previousDoc) {
-                        changes = Object.keys(doc).reduce((acc, key) => {
-                            if (JSON.stringify(doc[key]) !== JSON.stringify(previousDoc[key])) {
-                                if (options.columnsToIgnore?.includes(key)) {
-                                    return acc;
-                                }
-
-                                acc[key] = {
-                                    old: previousDoc[key],
-                                    new: doc[key],
-                                };
-                            }
-                            return acc;
-                        }, {} as Record<string, any>);
+                        // Use the new change formatter to get meaningful changes
+                        const formatterOptions = {
+                            ...pluginOptions.changeFormatter,
+                            excludeFields: [
+                                ...(pluginOptions.columnsToIgnore || []),
+                                ...(pluginOptions.changeFormatter?.excludeFields || [])
+                            ]
+                        };
+                        
+                        changes = formatChanges(doc, previousDoc, formatterOptions);
+                        
+                        // Only log if there are meaningful changes
+                        if (!shouldLogChanges(changes)) {
+                            return doc;
+                        }
                     }
 
                     await req.payload.create({
