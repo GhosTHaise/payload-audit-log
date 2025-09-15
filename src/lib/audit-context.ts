@@ -100,6 +100,12 @@ class AuditContextManager {
       return true;
     }
 
+    // If this is a different collection and no source operation is set yet, allow it
+    // This handles the case where different collections are updated independently
+    if (!context.sourceCollection) {
+      return true;
+    }
+
     // If cascading is not allowed, don't log other operations
     if (!options.allowCascading) {
       return false;
@@ -107,7 +113,10 @@ class AuditContextManager {
 
     // If cascading is allowed, check depth limits
     const maxDepth = options.maxCascadeDepth || 1;
-    if (context.operationStack && context.operationStack.length >= maxDepth) {
+    const currentDepth = context.operationStack ? context.operationStack.length : 0;
+    
+    // Check if adding this operation would exceed the depth limit
+    if (currentDepth >= maxDepth) {
       return false;
     }
 
