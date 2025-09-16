@@ -42,7 +42,12 @@
     "vitest": "^3.2.4"
   },
   "files": [
-    "dist"
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/lib/audit-context.js",
+    "dist/lib/audit-context.d.ts",
+    "dist/lib/change-formatter.js",
+    "dist/lib/change-formatter.d.ts"
   ],
   "publishConfig": {
     "access": "public"
