@@ -1,6 +1,6 @@
 {
   "name": "@ghosthaise/payload-audit-log",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Audit log plugin for PayloadCMS with changes tracking",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -42,8 +42,7 @@
     "vitest": "^3.2.4"
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
