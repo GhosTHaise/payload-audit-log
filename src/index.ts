@@ -1,101 +1,101 @@
 import { GeneratedTypes, Config, Plugin, PayloadRequest } from 'payload';
 import { AfterChangeHook, AfterDeleteHook, CollectionConfig } from 'payload/dist/collections/config/types';
 import { formatChanges, shouldLogChanges, ChangeFormatterOptions } from './lib/change-formatter';
-import { 
-  shouldLogAuditOperation, 
-  markDirectOperation, 
-  markCascadingOperation,
-  initializeAuditContext
+import {
+    shouldLogAuditOperation,
+    markDirectOperation,
+    markCascadingOperation,
+    initializeAuditContext
 } from './lib/audit-context';
 
 // Type for extended request with audit context
 interface AuditRequest extends PayloadRequest {
-  auditRequestId?: string;
+    auditRequestId?: string;
 }
 
 /**
  * Configuration options for the Audit Log plugin.
  */
 export interface AuditLogOptions {
-  /**
-   * List of collection names to enable audit logging for.
-   * 
-   * Example:
-   * collections: ['users', 'posts']
-   * 
-   * NOTE: The 'audit-logs' collection is excluded by default and cannot be tracked.
-   */
-  collections?: (keyof Omit<GeneratedTypes["collectionsUntyped"], 'audit-logs'>)[];
+    /**
+     * List of collection names to enable audit logging for.
+     * 
+     * Example:
+     * collections: ['users', 'posts']
+     * 
+     * NOTE: The 'audit-logs' collection is excluded by default and cannot be tracked.
+     */
+    collections?: (keyof Omit<GeneratedTypes["collectionsUntyped"], 'audit-logs'>)[];
 
-  /**
-   * Whether to include authentication events (login/logout, etc.) in the audit logs.
-   * Default is false.
-   */
-  includeAuth?: boolean;
+    /**
+     * Whether to include authentication events (login/logout, etc.) in the audit logs.
+     * Default is false.
+     */
+    includeAuth?: boolean;
 
-  /**
-   * Array of field names to exclude from change comparison when logging 'update' actions.
-   * 
-   * Example:
-   * columnsToIgnore: ['updatedAt', 'lastLogin']
-   * 
-   * Fields in this list will not trigger a logged change if they are the only fields modified.
-   */
-  columnsToIgnore?: string[];
+    /**
+     * Array of field names to exclude from change comparison when logging 'update' actions.
+     * 
+     * Example:
+     * columnsToIgnore: ['updatedAt', 'lastLogin']
+     * 
+     * Fields in this list will not trigger a logged change if they are the only fields modified.
+     */
+    columnsToIgnore?: string[];
 
-  /**
-   * Configuration for change formatting to reduce noise in audit logs.
-   */
-  changeFormatter?: ChangeFormatterOptions;
+    /**
+     * Configuration for change formatting to reduce noise in audit logs.
+     */
+    changeFormatter?: ChangeFormatterOptions;
 
-  /**
-   * Whether to allow cascading audit logs when relationships are updated.
-   * When false, only direct user operations are logged.
-   * Default is false.
-   */
-  allowCascading?: boolean;
+    /**
+     * Whether to allow cascading audit logs when relationships are updated.
+     * When false, only direct user operations are logged.
+     * Default is false.
+     */
+    allowCascading?: boolean;
 
-  /**
-   * Maximum depth for cascading operations when allowCascading is true.
-   * Default is 1.
-   */
-  maxCascadeDepth?: number;
+    /**
+     * Maximum depth for cascading operations when allowCascading is true.
+     * Default is 1.
+     */
+    maxCascadeDepth?: number;
 
-  /**
-   * Whether to allow overriding system field exclusions.
-   * When false (default), system fields like 'hash', 'salt', etc. are always excluded.
-   * When true, user-provided excludeFields can override system defaults.
-   */
-  allowSystemFieldOverride?: boolean;
+    /**
+     * Whether to allow overriding system field exclusions.
+     * When false (default), system fields like 'hash', 'salt', etc. are always excluded.
+     * When true, user-provided excludeFields can override system defaults.
+     */
+    allowSystemFieldOverride?: boolean;
 }
 
 /**
  * Default values used when no specific plugin options are provided.
  */
 export const defaultOptions: AuditLogOptions = {
-  collections: [],
-  includeAuth: false,
-  columnsToIgnore: [
-    'id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 
-    'sessions', 'password', 'token', 'secret', 'hash', 'salt',
-    'lockUntil', 'loginAttempts', 'resetPasswordToken', 'resetPasswordExpiration',
-    'lastLogin', 'lastLoginAt', 'emailVerified', 'emailVerificationToken',
-    'emailVerificationExpiration', 'forgotPasswordToken', 'forgotPasswordExpiration'
-  ],
-  changeFormatter: {
-    excludeFields: [
-      'id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 
-      'sessions', 'password', 'token', 'secret', 'hash', 'salt',
-      'lockUntil', 'loginAttempts', 'resetPasswordToken', 'resetPasswordExpiration',
-      'lastLogin', 'lastLoginAt', 'emailVerified', 'emailVerificationToken',
-      'emailVerificationExpiration', 'forgotPasswordToken', 'forgotPasswordExpiration'
+    collections: [],
+    includeAuth: false,
+    columnsToIgnore: [
+        'id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy',
+        'sessions', 'password', 'token', 'secret', 'hash', 'salt',
+        'lockUntil', 'loginAttempts', 'resetPasswordToken', 'resetPasswordExpiration',
+        'lastLogin', 'lastLoginAt', 'emailVerified', 'emailVerificationToken',
+        'emailVerificationExpiration', 'forgotPasswordToken', 'forgotPasswordExpiration'
     ],
-    meaningfulChangesOnly: true,
-    maxDepth: 2
-  },
-  allowCascading: false,
-  maxCascadeDepth: 0,
-  allowSystemFieldOverride: false
+    changeFormatter: {
+        excludeFields: [
+            'id', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy',
+            'sessions', 'password', 'token', 'secret', 'hash', 'salt',
+            'lockUntil', 'loginAttempts', 'resetPasswordToken', 'resetPasswordExpiration',
+            'lastLogin', 'lastLoginAt', 'emailVerified', 'emailVerificationToken',
+            'emailVerificationExpiration', 'forgotPasswordToken', 'forgotPasswordExpiration'
+        ],
+        meaningfulChangesOnly: true,
+        maxDepth: 2
+    },
+    allowCascading: false,
+    maxCascadeDepth: 0,
+    allowSystemFieldOverride: false
 };
 
 /**
@@ -113,12 +113,12 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
         ...defaultOptions,
         ...options,
         // Handle columnsToIgnore based on override setting
-        columnsToIgnore: options.allowSystemFieldOverride 
+        columnsToIgnore: options.allowSystemFieldOverride
             ? (options.columnsToIgnore ?? defaultOptions.columnsToIgnore)
             : [
                 ...(defaultOptions.columnsToIgnore ?? []),
                 ...(options.columnsToIgnore ?? [])
-              ],
+            ],
         // Merge changeFormatter options
         changeFormatter: {
             ...defaultOptions?.changeFormatter,
@@ -129,7 +129,7 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
                 : [
                     ...(defaultOptions?.changeFormatter?.excludeFields ?? []),
                     ...(options.changeFormatter?.excludeFields ?? [])
-                  ]
+                ]
         }
     };
 
@@ -200,13 +200,13 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
                 }) => {
                     const action = operation === 'create' ? 'create' : 'update';
                     const documentId = String(doc.id ?? previousDoc?.id ?? '');
-                    
+
                     // Initialize context if it doesn't exist
                     const auditReq = req as AuditRequest;
                     if (!auditReq.auditRequestId) {
                         initializeAuditContext(auditReq);
                     }
-                    
+
                     // Check if this operation should be logged based on context
                     const shouldLog = shouldLogAuditOperation(
                         auditReq,
@@ -238,14 +238,14 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
                                 ...(pluginOptions.changeFormatter?.excludeFields || [])
                             ]
                         };
-                        
+
                         changes = formatChanges(doc, previousDoc, formatterOptions);
-                        
+
                         // Only log if there are meaningful changes
                         if (!shouldLogChanges(changes)) {
                             return doc;
                         }
-                        
+
                         // Don't create audit log if changes is empty object
                         if (changes && typeof changes === 'object' && Object.keys(changes).length === 0) {
                             return doc;
@@ -262,19 +262,20 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
                             user: req.user?.id,
                             changes: action === 'update' ? changes : doc,
                         },
+                        req,
                     });
                     return doc;
                 };
 
                 const afterDelete: AfterDeleteHook = async ({ req, doc }) => {
                     const documentId = String(doc.id ?? '');
-                    
+
                     // Initialize context if it doesn't exist
                     const auditReq = req as AuditRequest;
                     if (!auditReq.auditRequestId) {
                         initializeAuditContext(auditReq);
                     }
-                    
+
                     // Check if this operation should be logged based on context
                     const shouldLog = shouldLogAuditOperation(
                         auditReq,
@@ -305,6 +306,7 @@ export const auditLogPlugin = (options: AuditLogOptions = {}): any => {
                             user: req.user?.id,
                             changes: doc, // Store the entire document being deleted
                         },
+                        req,
                     });
                 };
 
